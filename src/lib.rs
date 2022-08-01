@@ -115,7 +115,7 @@ end
 
     #[test]
     fn it_works() {
-        let mut lexer = Lexer::<Token>::with_buffer(
+        let lexer = Lexer::<Token>::with_buffer(
             Rule::Any(&[
                 Rule::Ignore(&Rule::Whitespace),
                 Rule::Value(&Rule::Literal("and"), |_| Token::And),
