@@ -81,7 +81,7 @@ impl<'a, T: core::fmt::Debug> Iterator for Lexer<'a, T> {
 mod tests {
     use super::*;
 
-    const TEST_CODE: &'static str = r#"
+    const TEST_CODE: &str = r#"
 function add(a, b)
     return a + b
 end
@@ -142,7 +142,7 @@ end
                 Rule::Value(&Rule::Literal("true"), |_| Token::True),
                 Rule::Value(&Rule::Literal("until"), |_| Token::Until),
                 Rule::Value(&Rule::Literal("while"), |_| Token::While),
-                Rule::Value(&Rule::Alphabetic, |v| Token::Identifier(v)),
+                Rule::Value(&Rule::Alphabetic, Token::Identifier),
             ]),
             TEST_CODE,
         );

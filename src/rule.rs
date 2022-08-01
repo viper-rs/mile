@@ -7,24 +7,15 @@ pub enum MatchResult<T> {
 
 impl<T> MatchResult<T> {
     pub const fn is_none(&self) -> bool {
-        match self {
-            Self::None => true,
-            _ => false,
-        }
+        matches!(self, Self::None)
     }
 
     pub const fn is_match(&self) -> bool {
-        match self {
-            Self::Match(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Match(_))
     }
 
     pub const fn is_partial_match(&self) -> bool {
-        match self {
-            Self::PartialMatch => true,
-            _ => false,
-        }
+        matches!(self, Self::PartialMatch)
     }
 }
 
@@ -65,12 +56,12 @@ impl<'a, T: core::fmt::Debug> Rule<'a, T> {
             Self::Literal(literal) => value
                 .eq(*literal)
                 .then_some(MatchResult::Match(None))
-                .unwrap_or(
+                .unwrap_or_else(|| {
                     literal
                         .starts_with(value)
                         .then_some(MatchResult::PartialMatch)
-                        .unwrap_or(MatchResult::None),
-                ),
+                        .unwrap_or(MatchResult::None)
+                }),
             Self::Numeric => value
                 .chars()
                 .all(|c| c.is_numeric())
@@ -90,12 +81,12 @@ impl<'a, T: core::fmt::Debug> Rule<'a, T> {
                 .matches(value)
                 .is_match()
                 .then_some(MatchResult::Match(Some(out(value))))
-                .unwrap_or(
+                .unwrap_or_else(|| {
                     rule.matches(value)
                         .is_partial_match()
                         .then_some(MatchResult::PartialMatch)
-                        .unwrap_or(MatchResult::None),
-                ),
+                        .unwrap_or(MatchResult::None)
+                }),
             Self::Ignore(rule) => rule.matches(value),
             Self::EndsWith(literal) => value
                 .ends_with(literal)
@@ -121,22 +112,22 @@ impl<'a, T: core::fmt::Debug> Rule<'a, T> {
                 .matches(value)
                 .is_match()
                 .then_some(MatchResult::Match(None))
-                .unwrap_or(
+                .unwrap_or_else(|| {
                     a.matches(value)
                         .is_partial_match()
                         .then_some(MatchResult::PartialMatch)
-                        .unwrap_or(
+                        .unwrap_or_else(|| {
                             b.matches(value)
                                 .is_match()
                                 .then_some(MatchResult::Match(None))
-                                .unwrap_or(
+                                .unwrap_or_else(|| {
                                     b.matches(value)
                                         .is_partial_match()
                                         .then_some(MatchResult::PartialMatch)
-                                        .unwrap_or(MatchResult::None),
-                                ),
-                        ),
-                ),
+                                        .unwrap_or(MatchResult::None)
+                                })
+                        })
+                }),
             Self::All(rules, out) => {
                 for rule in *rules {
                     match rule.matches(value) {
